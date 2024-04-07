@@ -21,49 +21,99 @@ class myPromise{
 
     // function of the instance to resolve the promise
     resolve = (result) => {
-        this.status = myPromise.FulFilled;
-        this.result = result;
-        console.log(this.result);
-        // call the callback function
-        this.callbacks.forEach(callback => {
-            callback.onFulFilledFunc(this.result);
-        });
+        setTimeout(() => {
+            this.status = myPromise.FulFilled;
+            this.result = result;
+            // call the callback function
+            this.callbacks.forEach(callback => {
+                callback.onFulFilledFunc(this.result);
+            });
+        }, 0)
     }
 
     // function of the instance to reject the promise
     reject = (result) => {
-        this.status = myPromise.Rejected;
-        this.result = result;
-        // call the callback function
-        this.callbacks.forEach(callback => {
-            callback.onRejectedFunc(this.result);
-        });
-        return this.result;
+        setTimeout(() => {
+            this.status = myPromise.Rejected;
+            this.result = result;
+            // call the callback function
+            this.callbacks.forEach(callback => {
+                callback.onRejectedFunc(this.result);
+            });
+        }, 0)
+        
     }
 
     // then function to handle the promise
     then = (onFulFilledFunc, onRejectedFunc) => {
         return new myPromise((resolve, reject) => {
+
+            const handleCallback = (callback, value) => {
+                setTimeout(() => {
+                    try{
+                        const res = callback(value);
+                        resolve(res);
+                    }catch(err){
+                        reject(err);
+                    }
+                }, 0);
+            }    
+
             if (this.status === myPromise.FulFilled) {
-                onFulFilledFunc(this.result);
+                handleCallback(onFulFilledFunc, this.result);
             }
             if (this.status === myPromise.Rejected) {
-                onRejectedFunc(this.result);
-            }else{
+                handleCallback(onRejectedFunc, this.result);
+            }else if(this.status === myPromise.Pending){
                 // if the promise is pending, push the callback functions to the callbacks array
-                this.callbacks.push({onFulFilledFunc, onRejectedFunc});
+                this.callbacks.push({
+                    onFulFilledFunc : value => handleCallback(onFulFilledFunc, value), 
+                    onRejectedFunc : err => handleCallback(onRejectedFunc, err)
+                });
             }
         });
     }
 
 }
 
+console.log(1);
+
 const myInstance = new myPromise((resolve, reject) => {
     setTimeout(() => {
-        resolve('resolved');
+        console.log(2);
+        reject('resolved');
     }, 2000);
 });
 
-myInstance.then((result) => {
-    console.log('then:', result);
-});
+myInstance.then(
+    (result) => {
+        console.log('then:', result);
+        return 'result from then';
+    },
+    (result) => {
+        console.log('catch:', result);
+        return 'result from then';
+    }
+).then(
+    (result) => {
+        console.log('then2:', result);
+        return 'result from then2';
+    }
+).then(
+    (result) => {
+        console.log('then3:', result);
+        throw new Error ('error2');
+    }
+).then(
+    (result) => {
+        console.log('then:', result);
+        return 'result from then';
+    },
+    (result) => {
+        console.log('catch2:', result);
+        return 'result from then';
+    }
+)
+
+
+console.log(3);
