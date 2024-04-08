@@ -1,5 +1,14 @@
 # 手写Promise
 
+### 事件循环与异步
+
+![Relationship of Async and Eventloop](./Relationship_Async_eventloop.png)
+
+![how to understand asynchronous in Javascript?](./asynchronous_in_JS.png)
+
+![explain eventloop in Javascript](./Explain_eventloop_in_JS.png)
+
+![Can JS count time exactly?](./timeCountInJS.png)
 
 ## 实现代码
 ```javascript

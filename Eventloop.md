@@ -14,6 +14,11 @@ JavaScript 的事件循环是基于事件循环和队列的概念，主要负责
 
 4. 重复以上步骤：一旦宏任务和微任务队列都为空，事件循环会等待新的任务到来。当新的宏任务被添加到队列中，事件循环会再次启动，重复上述步骤。
 ```
+![how to understand asynchronous in Javascript?](./asynchronous_in_JS.png)
+
+![explain eventloop in Javascript](./Explain_eventloop_in_JS.png)
+
+![Can JS count time exactly?](./timeCountInJS.png)
 
 
 
