@@ -1,6 +1,6 @@
 # A practice of Promise in Javascript
 
-[link to handwritePromise](./PromiseHandWrite.js)
+[implemented code](./PromiseHandWrite.js)
 
 # 手写Promise
 
