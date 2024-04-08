@@ -1,6 +1,7 @@
 # A Practice of Promise in JavaScript
 
-[中文版 Chinese Version](./README_ZH.md)
+[中文版](./README_ZH.md)
+[日本語版](./README_JP.md)
 
 [Implemented code](./PromiseHandWrite.js)
 

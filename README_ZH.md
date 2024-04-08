@@ -1,8 +1,9 @@
 # A practice of Promise in Javascript
 
 [English Version](./README.md)
+[日本語版](./README_JP.md)
 
-[implemented code](./PromiseHandWrite.js)
+[完整实现程序](./PromiseHandWrite.js)
 
 ---
 
