@@ -135,16 +135,15 @@ if (this.status === MyPromise.Pending) {
     });
 }
 ```
-===>
-**前一个Promise完成异步操作，状态变为FulFilled或Rejected之后，resolve或者reject也被执行**
+
+===>**前一个Promise完成异步操作，状态变为FulFilled或Rejected之后，resolve或者reject也被执行**
+
 ```js
 resolve = (data) => {
     this.#changeStatus(MyPromise.FulFilled, data);
 };
 ```
-===>
-
-**resolve和reject会调用#changeStatus方法,changeStatus方法里的setTimeout会异步执行里面的步骤**
+===>**resolve和reject会调用#changeStatus方法,changeStatus方法里的setTimeout会异步执行里面的步骤**
 ```js
 #changeStatus = (status, value) => {
     setTimeout(() => { // 使用 setTimeout 确保异步执行
@@ -162,9 +161,8 @@ resolve = (data) => {
     }, 0);
 };
 ```
+===>**因为之前在callbacks队列里加入了**
 
-===>
-**因为之前在callbacks队列里加入了**
 ```js
 {
     onFulFilled: value => handleCallback(onFulFilled, value),
@@ -179,7 +177,8 @@ value => handleCallback(onFulFilled, value)
 err => handleCallback(onRejected, err)
 ```
 
-**此时回到handleCallback方法，异步执行resolve或者reject，如果callback代表的onFulFilled或onRejected返回的是一个Promise实例，等待这个实例resolve或reject。**
+===>**此时回到handleCallback方法，异步执行resolve或者reject，如果callback代表的onFulFilled或onRejected返回的是一个Promise实例，等待这个实例resolve或reject。**
+
 ```js
 const handleCallback = (callback, value) => {
     setTimeout(() => {
@@ -209,6 +208,8 @@ const handleCallback = (callback, value) => {
 4. 链式调用：如果 .then() 中的回调函数返回一个新的 Promise（result），则下一个 .then() 中的回调会等待这个新 Promise 解决后才执行。如果回调返回一个非 Promise 值，或者没有返回值，则直接将该值作为下一个 .then() 的输入。
 
 5. 错误处理：如果在执行回调过程中发生错误，或者回调函数返回一个处于 Rejected 状态的 Promise，则会跳到链中最近的一个 .catch() 或 .then() 的 onRejected 回调中处理错误。
+
+---
 
 
 

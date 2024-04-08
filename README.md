@@ -103,16 +103,13 @@ if (this.status === MyPromise.Pending) {
     });
 }
 ```
-===>
-**After the previous Promise completes the asynchronous operation, the status changes to FulFilled or Rejected, and resolve or reject is also executed**
+===>**After the previous Promise completes the asynchronous operation, the status changes to FulFilled or Rejected, and resolve or reject is also executed**
 ```js
 resolve = (data) => {
     this.#changeStatus(MyPromise.FulFilled, data);
 };
 ```
-===>
-
-**resolve and reject will call the #changeStatus method, and the setTimeout in the changeStatus method will execute the steps inside asynchronously**
+===>**resolve and reject will call the #changeStatus method, and the setTimeout in the changeStatus method will execute the steps inside asynchronously**
 ```js
 #changeStatus = (status, value) => {
     setTimeout(() => { // Use setTimeout to ensure asynchronous execution
@@ -131,8 +128,7 @@ resolve = (data) => {
 };
 ```
 
-===>
-**Because it was added to the callbacks queue before**
+===>**Because it was added to the callbacks queue before**
 ```js
 {
     onFulFilled: value => handleCallback(onFulFilled, value),
@@ -140,21 +136,21 @@ resolve = (data) => {
 }
 ```
 
-**So what is executed at this time is**
+===>**So what is executed at this time is**
 
 ```js
 value => handleCallback(onFulFilled, value)
 err => handleCallback(onRejected, err)
 ```
 
-**At this time, return to the handleCallback method, execute resolve or reject asynchronously, if the callback representing onFulFilled or onRejected returns a Promise instance, wait for this instance to resolve or reject.**
+===>**At this time, return to the handleCallback method, execute resolve or reject asynchronously, if the callback representing onFulFilled or onRejected returns a Promise instance, wait for this instance to resolve or reject.**
 
 ```js
 value => handleCallback(onFulfilled, value)
 err => handleCallback(onRejected, err)
 ```
 
-**At this point, we return to the handleCallback method, execute resolve or reject asynchronously. If the callback representing onFulfilled or onRejected returns a Promise instance, we wait for this instance to resolve or reject.**
+===>**At this point, we return to the handleCallback method, execute resolve or reject asynchronously. If the callback representing onFulfilled or onRejected returns a Promise instance, we wait for this instance to resolve or reject.**
 
 ```js
 const handleCallback = (callback, value) => {
