@@ -142,7 +142,7 @@ MyInstance.then((value) => {
 ```
 
 
-## 生成实例，链式调用时的顺序：
+## 生成实例，链式调用时的顺序
 
 ### then是在前一个Promise被解决（resolve或reject）时才会触发
 ***当第一个 then 中的回调函数被加入到微任务队列中时，它会等待 MyInstance Promise 解决后才会执行。在这个回调函数执行期间，如果它返回了一个新的 Promise（比如在您的示例中返回了一个新的 MyPromise 实例），那么第二个 then 中的回调函数会等待这个新的 Promise 解决后才会被加入到微任务队列中。***
