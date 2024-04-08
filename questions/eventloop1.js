@@ -27,6 +27,15 @@ promise1
 console.log('U');
 
 // what is the output?
+// X
+// Z
+// U
+// Resolve 1
+// V
+// Resolve 2
+// Y
+// W
+
 
 /* explanation:
 That's correct! Here's how the execution order plays out:

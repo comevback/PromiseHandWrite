@@ -9,24 +9,27 @@ class MyPromise{
         this.callbacks = [];
 
         const resolve = (data) => {
-            if(this.status === MyPromise.Pending){
-                this.status = MyPromise.FulFilled;
-                this.result = data;
-                this.callbacks.forEach(callback => {
-                    callback.onFulFilledFunc(this.result);
-                });
-            }
+            setTimeout(() => {
+                if(this.status === MyPromise.Pending){
+                    this.status = MyPromise.FulFilled;
+                    this.result = data;
+                    this.callbacks.forEach(callback => {
+                        callback.onFulFilledFunc(this.result);
+                    });
+                }
+            }, 0)
         }
 
         const reject = (data) => {
-            if(this.status === MyPromise.Pending){
-                this.status = MyPromise.Rejected;
-                this.result = data;
-                this.callbacks.forEach(callback => {
-                    callback.onRejectedFunc(this.result);
-                })
-            }
-
+            setTimeout(() => {
+                if(this.status === MyPromise.Pending){
+                    this.status = MyPromise.Rejected;
+                    this.result = data;
+                    this.callbacks.forEach(callback => {
+                        callback.onRejectedFunc(this.result);
+                    })
+                }
+            }, 0)
         }
 
         try{
@@ -44,9 +47,13 @@ class MyPromise{
                 setTimeout(() => {
                     try{
                         const result = callback(value);
-                        resolve(result);
-                    }catch{
-                        reject(value);
+                        if(result instanceof MyPromise){
+                            result.then(resolve, reject);
+                        }else{
+                            resolve(result);
+                        }
+                    }catch(err){
+                        reject(err);
                     }
                 }, 0)
             }
@@ -68,6 +75,10 @@ class MyPromise{
             }
         })
     }
+
+    catch = (onRejectedFunc) => {
+        return this.then(null, onRejectedFunc);
+    }
 }
 
 console.log(1);
@@ -76,7 +87,7 @@ const myInstance = new MyPromise((resolve, reject) => {
     setTimeout(() => {
         console.log(2);
         reject('resolved');
-    }, 2000);
+    }, 500);
 });
 
 myInstance.then(
@@ -111,3 +122,47 @@ myInstance.then(
 
 
 console.log(3);
+
+// 生成正确的测试实例
+const MyInstance = new MyPromise((resolve, reject) => {
+    setTimeout(() => {
+        resolve('this is a test for MyPromise.'); // 异步解决
+    }, 1000);
+});
+
+MyInstance.then((value) => {
+    console.log(`First then: ${value}`);
+    return new MyPromise((resolve, reject) => {
+        setTimeout(() => {
+            resolve("Second value"); // 返回一个新的 MyPromise 实例
+        }, 1000);
+    });
+})
+.then((value) => {
+    console.log(`Second then: ${value}`);
+    return "Third value"; // 返回一个普通值
+})
+.then((value) => {
+    console.log(`Third then: ${value}`);
+    throw new Error("An error occurred"); // 抛出一个错误
+})
+.catch((error) => {
+    console.error(`Catch: ${error.message}`);
+    return new MyPromise((resolve, reject) => {
+        setTimeout(() => {
+            resolve("Recovered value"); // 错误处理后返回一个新的 MyPromise 实例
+        }, 1000);
+    });
+})
+.then((value) => {
+    console.log(`Fourth then: ${value}`); // 处理最终结果
+});
+
+//生成错误的测试实例，测试构造函数是否能捕获。
+const ErrInstance = new MyPromise((resolve, reject) => {
+    throw new Error ('error')
+});
+
+ErrInstance.catch(
+    (data) => {console.log(data)}
+);

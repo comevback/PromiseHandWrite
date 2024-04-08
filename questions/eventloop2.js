@@ -5,7 +5,11 @@ setTimeout(() => {
   Promise.resolve()
     .then(() => {
       console.log('3');
-      setTimeout(() => console.log('4'), 0);
+      return new Promise((resolve, reject) => {
+        console.log(11);
+        setTimeout(() => console.log('4'), 0);
+        resolve(12);
+      })
     })
     .then(() => {
       console.log('5');
@@ -24,7 +28,17 @@ Promise.resolve().then(() => {
 console.log('10');
 
 // what is the output?
-
+// 1
+// 10
+// 6
+// 8
+// 9
+// 2
+// 3
+// 11
+// 5
+// 7
+// 4
 /* explanation:
 Correct! That's the expected order of output. Here's the explanation:
 
@@ -61,6 +75,4 @@ Now that all microtasks have been processed, the engine moves on to the task que
 14. Inside the first `setTimeout`, after logging "3", a nested `setTimeout` is set up to log "4". Since this is a new task, it won't execute until after the current task and any other pending tasks complete.
 
 15. Finally, the nested `setTimeout` inside the promise in the first `setTimeout` callback logs "4".
-
-So the complete output is: "1", "10", "6", "8", "9", "2", "3", "5", "7", "4".
 */

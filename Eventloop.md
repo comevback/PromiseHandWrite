@@ -1,11 +1,21 @@
-# Promise Note
+# Eventloop
 
-(resolve, reject) => {} 本身就是一个回调函数。在创建一个新的 Promise 对象时，你需要提供一个函数作为参数，这个函数叫做 "执行器"（executor）。这个执行器函数接收两个参数：resolve 和 reject，它们都是函数。
+[eventloop question 1](./questions/eventloop1.js)
+[eventloop question 2](./questions/eventloop2.js)
 
-+ resolve 函数用于在异步操作成功时解决（fulfill）Promise。
-+ reject 函数用于在异步操作失败时拒绝（reject）Promise。
+```md
+JavaScript 的事件循环是基于事件循环和队列的概念，主要负责执行代码、收集和处理事件以及执行队列中的任务。事件循环的执行顺序大致如下：
 
-这个执行器函数 (resolve, reject) => {} 就是一个回调函数，它定义了异步操作成功或失败时如何处理 Promise 的状态。在 Promise 内部，当你## 调用 resolve() 函数时，Promise 的状态会变为 "fulfilled"，并且任何绑定到这个 Promise 的 .then() 方法中的成功回调函数都会被调用。类似地，当你调用 reject() 函数时，Promise 的状态会变为 "rejected"，并且任何绑定到这个 Promise 的 .catch() 方法中的失败回调函数都会被调用。
+1. 执行同步代码：首先，事件循环会执行当前执行栈中的所有同步代码。
+
+2. 执行微任务队列：同步代码执行完毕后，事件循环会检查微任务队列。如果队列中有任务（如 Promise 的 then、catch、finally 回调），则会依次执行这些微任务。微任务队列中的任务会在当前宏任务（即当前执行栈）完成后立即执行。
+
+3. 执行宏任务队列：微任务队列为空后，事件循环会移动到宏任务队列。宏任务包括 setTimeout、setInterval、setImmediate（Node.js）、I/O 操作等。事件循环会取出宏任务队列中的第一个任务执行。每执行完一个宏任务，就会重新检查微任务队列，如果有新的微任务，就会先执行这些微任务。
+
+4. 重复以上步骤：一旦宏任务和微任务队列都为空，事件循环会等待新的任务到来。当新的宏任务被添加到队列中，事件循环会再次启动，重复上述步骤。
+```
+
+
 
 
 
@@ -44,9 +54,10 @@ console.log(3);
 
 首先打印 1（Promise 执行器内的同步代码），然后打印 3（Promise 外的同步代码），最后打印 2（Promise 解决后的异步回调）。
 
-![eventloog test](~/eventloop.png)
+![simple question](./eventloop.png)
 
-51
+answer: 
+51342
 
 <a href="https://www.youtube.com/watch?v=eiC58R16hb8" >video answer</a>
 
@@ -83,3 +94,13 @@ console.log(3);
 5. 重复步骤 3 和步骤 4。
 
 在整个过程中，微任务队列总是优先于宏任务队列被清空，这意味着微任务（如 Promise 回调）的执行时机会早于宏任务（如 setTimeout 回调）。这是为了确保较小的异步操作（如 Promise 解决）能够在较大的异步操作（如 I/O 事件）之前尽快完成，这样可以更快地处理高优先级的任务。
+
+
+=======================================================
+
+(resolve, reject) => {} 本身就是一个回调函数。在创建一个新的 Promise 对象时，你需要提供一个函数作为参数，这个函数叫做 "执行器"（executor）。这个执行器函数接收两个参数：resolve 和 reject，它们都是函数。
+
++ resolve 函数用于在异步操作成功时解决（fulfill）Promise。
++ reject 函数用于在异步操作失败时拒绝（reject）Promise。
+
+这个执行器函数 (resolve, reject) => {} 就是一个回调函数，它定义了异步操作成功或失败时如何处理 Promise 的状态。在 Promise 内部，当你## 调用 resolve() 函数时，Promise 的状态会变为 "fulfilled"，并且任何绑定到这个 Promise 的 .then() 方法中的成功回调函数都会被调用。类似地，当你调用 reject() 函数时，Promise 的状态会变为 "rejected"，并且任何绑定到这个 Promise 的 .catch() 方法中的失败回调函数都会被调用。
