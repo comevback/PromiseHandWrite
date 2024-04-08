@@ -235,7 +235,7 @@ const handleCallback = (callback, value) => {
 ```
 
 
-### 简化版的解释：
+### 简单总结：
 
 1. then方法调用：当 .then() 被调用时，它会检查 Promise 的状态。如果状态是 Pending，则将回调函数（onFulfilled 和 onRejected）添加到回调队列中等待执行。
 
