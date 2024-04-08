@@ -4,24 +4,32 @@
 
 [Implemented code](./PromiseHandWrite.js)
 
-### Event Loop and Asynchronous
+---
 
-![Relationship of Async and Eventloop](./Relationship_Async_eventloop.png)
+## Asynchronous and Eventloop
 
-![How to understand asynchronous in JavaScript?](./asynchronous_in_JS.png)
+> **Single-threaded main thread is the reason** why asynchronous is needed, to realize a non-blocking experience.
 
-![Explain event loop in JavaScript](./Explain_eventloop_in_JS.png)
+> **Eventloop is the implementation** of the asynchronous.
 
-![Can JS count time exactly?](./timeCountInJS.png)
+The browser's rendering main thread is single-threaded, which means it can only process one task at a time. If there is a job or operation we don't know how long it will take, or will take a long time, the synchronous main thread will be stuck, that's why asynchronous was used in main thread, which allows main thread to initiate a task and then continue with other tasks without waiting for the first one to complete.
+
+Asynchronous is implemented by eventloop, it's an endless for loop, constantly check if there is any job in message queue, when there is any job, the eventloop will move it to the call stack, it will be processed by main thread. 
+
+When you perform an asynchronous operation, such as requesting data from a server with 'fetch', setting a timer with 'setTimeout', or working with promises, you typically provide a callback function. this callback function will be placed into a certain message queue.
+
+There are many kinds of message queue. the highest prior queue is always the Microtask queue.
+
+---
 
 # Handwritten Promise
 
 ## Implemented Code
+
+[Complete Program Link](./PromiseHandWrite.js)
+
 ```javascript
 class MyPromise {
-    static Pending = 'pending';
-    static FulFilled = 'fulfilled';
-    static Rejected = 'rejected';
 
     constructor(executor) {
         this.status = MyPromise.Pending; // Initial status is pending
@@ -38,17 +46,7 @@ class MyPromise {
     // Private method, used to change the status and execute the corresponding callback
     #changeStatus = (status, value) => {
         setTimeout(() => { // Use setTimeout to ensure asynchronous execution
-            if (this.status === MyPromise.Pending) { // The status can only change from pending
-                this.status = status; // Change status
-                this.value = value; // Save value
-                this.callbacks.forEach((callback) => { // Execute all callbacks
-                    if (status === MyPromise.FulFilled) {
-                        callback.onFulFilled(this.value);
-                    } else if (status === MyPromise.Rejected) {
-                        callback.onRejected(this.value);
-                    }
-                });
-            }
+            // check stauts, change status, change value, run every callback at callbacks
         }, 0);
     };
 
@@ -65,36 +63,17 @@ class MyPromise {
     // then method
     then = (onFulFilled, onRejected) => {
         return new MyPromise((resolve, reject) => {
-            // In order to chain calls, you need to ensure that onFulFilled and onRejected always return a value
-            onFulFilled = typeof onFulFilled === 'function' ? onFulFilled : (value) => { return value; };
-            onRejected = typeof onRejected === 'function' ? onRejected : (err) => { throw new Error(err); };
+            // check the type
 
             // Function for handling callbacks
             const handleCallback = (callback, value) => {
-                setTimeout(() => {
-                    try {
-                        const result = callback(value); // Execute callback
-                        if (result instanceof MyPromise) { // If the callback returns a MyPromise instance, wait for it to resolve
-                            result.then(resolve, reject);
-                        } else {
-                            resolve(result); // Otherwise, directly resolve the result
-                        }
-                    } catch (err) {
-                        reject(err); // If the callback execution error, directly reject
-                    }
-                }, 0);
+                // setTimeout to asynchronous operate
+                    //check the result of callback(value) to decide is resolve, reject or result.then();
             };
 
             // Perform the corresponding operation according to the current status
             if (this.status === MyPromise.Pending) {
-                this.callbacks.push({
-                    onFulFilled: value => handleCallback(onFulFilled, value),
-                    onRejected: err => handleCallback(onRejected, err)
-                });
-            } else if (this.status === MyPromise.FulFilled) {
-                handleCallback(onFulFilled, this.value);
-            } else if (this.status === MyPromise.Rejected) {
-                handleCallback(onRejected, this.value);
+                ///....
             }
         });
     };
@@ -103,69 +82,17 @@ class MyPromise {
     catch(onRejected) {
         return this.then(null, onRejected); // Call the then method to handle the rejected situation, must add return, if not added, this catch function will return undefined, not the result of then(null,onRejected).
     }
-
-    // finally method (unfinished)
-    // finally = (onFinally) => {
-    //     return this.then(
-    //         (value) => {
-    //             onFinally();
-    //             return value; // Ensure that you can continue to chain calls after finally
-    //         },
-    //         (reason) => {
-    //             onFinally();
-    //             throw reason; // Ensure that errors can continue to be passed
-    //         }
-    //     );
-    // };
 }
-
-// Test case
-const MyInstance = new MyPromise((resolve, reject) => {
-    setTimeout(() => {
-        resolve('this
-
- is
-
- a test for MyPromise.'); // Asynchronously resolve
-    }, 1000);
-});
-
-MyInstance.then((value) => {
-    console.log(`First then: ${value}`);
-    return new MyPromise((resolve, reject) => {
-        setTimeout(() => {
-            resolve("Second value"); // Return a new MyPromise instance
-        }, 1000);
-    });
-})
-.then((value) => {
-    console.log(`Second then: ${value}`);
-    return "Third value"; // Return a normal value
-})
-.then((value) => {
-    console.log(`Third then: ${value}`);
-    throw new Error("An error occurred"); // Throw an error
-})
-.catch((error) => {
-    console.error(`Catch: ${error.message}`);
-    return new MyPromise((resolve, reject) => {
-        setTimeout(() => {
-            resolve("Recovered value"); // Return a new MyPromise instance after error handling
-        }, 1000);
-    });
-})
-.then((value) => {
-    console.log(`Fourth then: ${value}`); // Handle the final result
-});
-
 ```
+
+---
 
 ## The order of chain calls when generating instances:
 
 ### The then is triggered only when the previous Promise is resolved (resolve or reject)
 ***When the callback function in the first then is added to the microtask queue, it will wait for the MyInstance Promise to be resolved before executing. During the execution of this callback function, if it returns a new Promise (as in your example, a new MyPromise instance is returned), then the callback function in the second then will wait for this new Promise to be resolved before being added to the microtask queue.***
 
-=====================================================
+---
 
 **When executing then, assuming asynchronous, the previous Promise has not yet resolved or rejected, the status is still Pending, at this time, first add the onFulFilled and onRejected functions to the callbacks queue**
 ```js
@@ -222,9 +149,6 @@ err => handleCallback(onRejected, err)
 
 **At this time, return to the handleCallback method, execute resolve or reject asynchronously, if the callback representing onFulFilled or onRejected returns a Promise instance, wait for this instance to resolve or reject.**
 
-Here's the English version of the excerpt from your README.md:
-
-```markdown
 ```js
 value => handleCallback(onFulfilled, value)
 err => handleCallback(onRejected, err)
@@ -261,6 +185,7 @@ const handleCallback = (callback, value) => {
 
 5. Error handling: If an error occurs during callback execution, or if the callback function returns a Promise in the Rejected state, it jumps to the nearest .catch() or .then() with an onRejected callback in the chain to handle the error.
 
+---
 
 ## What exactly does then return?
 
@@ -334,3 +259,5 @@ promise
     });
 ```
 In this example, the first .then() returns a new Promise object. This new Promise is resolved after 1 second, and its value is 20. Therefore, the result in the second .then() is 20, and its execution starts after the previous Promise is resolved.
+
+---

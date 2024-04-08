@@ -4,20 +4,30 @@
 
 [implemented code](./PromiseHandWrite.js)
 
-### 事件循环与异步
+---
 
-![Relationship of Async and Eventloop](./Relationship_Async_eventloop.png)
+## 事件循环与异步
 
-![how to understand asynchronous in Javascript?](./asynchronous_in_JS.png)
+> 单线程的主线程是需要异步的原因，以实现非阻塞体验。
 
-![explain eventloop in Javascript](./Explain_eventloop_in_JS.png)
+> 事件循环是异步的实现方式。
 
-![Can JS count time exactly?](./timeCountInJS.png)
+浏览器的渲染主线程是单线程的，这意味着它一次只能处理一个任务。
+如果有一个我们不知道会花多长时间或者会花很长时间的工作或操作，同步主线程将会被阻塞，这就是为什么在主线程中使用异步的原因，它允许主线程启动一个任务，然后继续执行其他任务，而不用等待第一个任务完成。
+
+异步是通过事件循环实现的，它是一个无尽的for循环，不断检查消息队列（Message queue）中是否有任何工作，当有工作时，事件循环会将其移至调用栈（Call Stack），然后由主线程处理。
+
+当你执行一个异步操作时，比如用'fetch'从服务器请求数据，用'setTimeout'设置计时器，或者使用promises，你通常会提供一个回调函数。这个回调函数将被放置到某个消息队列中。
+
+在JS中，有很多种消息队列。优先级最高的队列始终是Microtask队列。
 
 # 手写Promise
 
 
-## 实现代码
+
+
+[完整代码](./PromiseHandWrite.js)
+
 ```javascript
 class MyPromise {
     static Pending = 'pending';
@@ -104,56 +114,7 @@ class MyPromise {
     catch(onRejected) {
         return this.then(null, onRejected); // 调用 then 方法处理拒绝的情况,必须加上return，如果不加，这个catch函数就会返回undefined，而不是then(null,onRejected)的结果MyPromise。
     }
-
-    // finally 方法（未完成）
-    // finally = (onFinally) => {
-    //     return this.then(
-    //         (value) => {
-    //             onFinally();
-    //             return value; // 保证 finally 后可以继续链式调用
-    //         },
-    //         (reason) => {
-    //             onFinally();
-    //             throw reason; // 保证错误可以继续传递
-    //         }
-    //     );
-    // };
 }
-
-// 测试用例
-const MyInstance = new MyPromise((resolve, reject) => {
-    setTimeout(() => {
-        resolve('this is a test for MyPromise.'); // 异步解决
-    }, 1000);
-});
-
-MyInstance.then((value) => {
-    console.log(`First then: ${value}`);
-    return new MyPromise((resolve, reject) => {
-        setTimeout(() => {
-            resolve("Second value"); // 返回一个新的 MyPromise 实例
-        }, 1000);
-    });
-})
-.then((value) => {
-    console.log(`Second then: ${value}`);
-    return "Third value"; // 返回一个普通值
-})
-.then((value) => {
-    console.log(`Third then: ${value}`);
-    throw new Error("An error occurred"); // 抛出一个错误
-})
-.catch((error) => {
-    console.error(`Catch: ${error.message}`);
-    return new MyPromise((resolve, reject) => {
-        setTimeout(() => {
-            resolve("Recovered value"); // 错误处理后返回一个新的 MyPromise 实例
-        }, 1000);
-    });
-})
-.then((value) => {
-    console.log(`Fourth then: ${value}`); // 处理最终结果
-});
 
 ```
 
@@ -163,7 +124,7 @@ MyInstance.then((value) => {
 ### then是在前一个Promise被解决（resolve或reject）时才会触发
 ***当第一个 then 中的回调函数被加入到微任务队列中时，它会等待 MyInstance Promise 解决后才会执行。在这个回调函数执行期间，如果它返回了一个新的 Promise（比如在您的示例中返回了一个新的 MyPromise 实例），那么第二个 then 中的回调函数会等待这个新的 Promise 解决后才会被加入到微任务队列中。***
 
-=====================================================
+---
 
 **执行then时，假设异步，前一个Promise还没有resolve或reject，状态还是Pending，此时先把onFulFilled和onRejected函数加入callbacks队列**
 ```js
